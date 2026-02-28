@@ -5,7 +5,7 @@ const studentschema = new mongoose.Schema({
         type: String,
         required: true
     },
-    rollnumber:{
+    rollNumber:{
         type: String,
         required: true
     },
@@ -14,11 +14,11 @@ const studentschema = new mongoose.Schema({
         required: true
     },
     totalClasses:{
-        type: String,
+        type: Number,
         required: true
     },
     AttendedClasses:{
-        type: String,
+        type: Number,
         required: true
     },
 },{timestamps: true});
