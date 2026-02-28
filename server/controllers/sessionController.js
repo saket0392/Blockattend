@@ -12,7 +12,7 @@ exports.createSession = async (req, res) => {
     const sessionId = uuidv4();
     const nonce = uuidv4();
 
-    const expiryTime = new Date(Date.now() + 90 * 1000); 
+    const expiryTime = new Date(Date.now() + 5 * 60 * 1000); 
 
     const session = await Session.create({
       sessionId,
