@@ -1,0 +1,110 @@
+/* ===============================
+   AUTH CONTAINER
+================================ */
+.auth-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f6fb;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   AUTH FORM
+================================ */
+.auth-form {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   INPUTS & SELECT
+================================ */
+.auth-form input,
+.auth-form select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+  outline: none;
+  border-color: #1e2a5a;
+}
+
+/* ===============================
+   BUTTON
+================================ */
+.auth-form button {
+  width: 100%;
+  padding: 12px;
+  background: #1e2a5a;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.auth-form button:hover {
+  background: #16204a;
+}
+
+/* ===============================
+   LINKS
+================================ */
+.link {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  color: #1e2a5a;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   MOBILE OPTIMIZATION
+================================ */
+@media (max-width: 480px) {
+  .auth-form {
+    padding: 24px;
+  }
+
+  .auth-form input,
+  .auth-form select {
+    font-size: 14px;
+  }
+
+  .auth-form button {
+    font-size: 15px;
+  }
+}
+
+/* ===============================
+   SMALL HEIGHT DEVICES (FIXED)
+================================ */
+@media (max-height: 600px) {
+  .auth-container {
+    justify-content: center;
+    align-items: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
