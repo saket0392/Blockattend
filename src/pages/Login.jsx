@@ -1,13 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import RoleSelector from "../components/RoleSelector";
 import "../styles/auth.css";
-
 function Login() {
   const [role, setRole] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!role) return;
+
+    switch (role) {
+      case "student":
+        navigate("/dashboards/StudentDashboard");
+        break;
+      case "faculty":
+        navigate("/dashboards/FacultyDashboard");
+        break;
+      case "admin":
+        navigate("/dashboards/AdminDashboard");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -31,7 +46,7 @@ function Login() {
           </>
         )}
 
-        <button type="submit" disabled={!role}>
+        <button type="submit" disabled={!role} onClick={() => navigate("/")}>
           Login
         </button>
 
