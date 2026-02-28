@@ -3,10 +3,12 @@ const cors = require('cors');
 const connectDb = require("./config/db");
 const app = express();
 const sessionRoutes = require("./routes/sessionRoutes")
+const analyticsRoutes = require("./routes/analyticsRoutes");
 connectDb();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/students", analyticsRoutes);
 app.use("/api/session", sessionRoutes);
 app.get('/', (req, res) => {
    res.send("Blockattend Backend Running");

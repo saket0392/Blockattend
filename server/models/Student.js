@@ -15,10 +15,10 @@ const studentschema = new mongoose.Schema({
     },
     totalClasses:{
         type: String,
-        required: true
+        required: Number
     },
     AttendedClasses:{
-        type: String,
+        type: Number,
         required: true
     },
 },{timestamps: true});
