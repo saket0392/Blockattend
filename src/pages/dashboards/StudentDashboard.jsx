@@ -1,18 +1,28 @@
+import { useNavigate } from "react-router-dom";
 import "../../styles/dashboard.css";
 
 function StudentDashboard() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+  };
+
   return (
     <div className="dashboard">
       {/* Sidebar */}
       <aside className="sidebar">
         <h2>Student</h2>
         <ul>
-          <li>Dashboard</li>
-          <li>My Attendance</li>
-          <li>My Courses</li>
-          <li>Attendance History</li>
-          <li>Profile</li>
-          <li>Logout</li>
+          <li onClick={() => navigate("/student")}>Dashboard</li>
+          <li onClick={() => navigate("/student/attendance")}>My Attendance</li>
+          <li onClick={() => navigate("/student/courses")}>My Courses</li>
+          <li onClick={() => navigate("/student/history")}>
+            Attendance History
+          </li>
+          <li onClick={() => navigate("/student/profile")}>Profile</li>
+          <li onClick={handleLogout}>Logout</li>
         </ul>
       </aside>
 

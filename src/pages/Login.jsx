@@ -12,13 +12,13 @@ function Login() {
 
     switch (role) {
       case "student":
-        navigate("/dashboards/StudentDashboard");
+        navigate("/student/dashboard");
         break;
       case "faculty":
-        navigate("/dashboards/FacultyDashboard");
+        navigate("/faculty/dashboard");
         break;
       case "admin":
-        navigate("/dashboards/AdminDashboard");
+        navigate("/admin/dashboard");
         break;
       default:
         break;
