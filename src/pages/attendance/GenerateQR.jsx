@@ -9,9 +9,7 @@ function GenerateQR() {
   useEffect(() => {
     generateQR();
 
-    // refresh QR every 10 seconds
     const interval = setInterval(generateQR, 10000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -31,6 +29,7 @@ function GenerateQR() {
         <div className="qr-box">
           <QRCodeCanvas value={qrData} size={220} />
           <p>QR refreshes every 10 seconds</p>
+          <p>QR valid for 3 minutes</p>
         </div>
       )}
     </div>

@@ -5,8 +5,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 
-// import GenerateQR from "./pages/attendance/GenerateQR";
-// import ScanQR from "./pages/attendance/ScanQR";
+import GenerateQR from "./pages/attendance/GenerateQR";
+import ScanQR from "./pages/attendance/ScanQR";
 
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import FacultyDashboard from "./pages/dashboards/FacultyDashboard";
@@ -37,10 +37,7 @@ function App() {
       {/* Faculty Dashboard */}
       <Route path="/faculty" element={<FacultyDashboard />} />
       <Route path="/faculty/courses" element={<div>My Courses Page</div>} />
-      <Route
-        path="/faculty/mark-attendance"
-        element={<div>Mark Attendance Page</div>}
-      />
+      <Route path="/faculty/mark-attendance" element={<GenerateQR />} />
       <Route
         path="/faculty/view-attendance"
         element={<div>View Attendance Page</div>}
@@ -51,10 +48,7 @@ function App() {
       />
       {/* Student Dashboard */}
       <Route path="/student" element={<StudentDashboard />} />
-      <Route
-        path="/student/attendance"
-        element={<div>My Attendance Page</div>}
-      />
+      <Route path="/student/attendance" element={<ScanQR />} />
       <Route path="/student/courses" element={<div>My Courses Page</div>} />
       <Route
         path="/student/history"

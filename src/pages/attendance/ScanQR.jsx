@@ -4,6 +4,8 @@ import "../../styles/attendance.css";
 
 function ScanQR() {
   const qrCodeRef = useRef(null);
+  const hasScanned = useRef(false);
+
   const [scannedData, setScannedData] = useState(null);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -11,29 +13,33 @@ function ScanQR() {
   useEffect(() => {
     if (qrCodeRef.current) return;
 
-    const html5QrCode = new Html5Qrcode("qr-reader");
-    qrCodeRef.current = html5QrCode;
+    const scanner = new Html5Qrcode("qr-reader");
+    qrCodeRef.current = scanner;
 
-    html5QrCode
+    scanner
       .start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (decodedText) => {
+          if (hasScanned.current) return;
+          hasScanned.current = true;
+
           try {
             const payload = JSON.parse(decodedText);
             const now = Date.now();
 
             if (now > payload.timestamp + payload.expiresIn) {
               setError("QR Code Expired ❌");
-              html5QrCode.stop();
+              scanner.stop();
               return;
             }
 
             setScannedData(payload);
             setSuccess(true);
-            html5QrCode.stop();
+            scanner.stop();
           } catch {
             setError("Invalid QR Code ❌");
+            scanner.stop();
           }
         },
       )
