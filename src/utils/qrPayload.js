@@ -5,5 +5,6 @@ export function generateQRPayload({ courseId, facultyId }) {
     facultyId,
     timestamp: Date.now(),
     expiresIn: 180000, // 3 minutes
+    nonce: Math.random().toString(36).substring(2),
   });
 }
