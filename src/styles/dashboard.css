@@ -1,0 +1,134 @@
+/* ===============================
+   DASHBOARD LAYOUT
+================================ */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6fb;
+  width: 100%;
+}
+
+/* ===============================
+   SIDEBAR
+================================ */
+.sidebar {
+  width: 220px;
+  background: #1e2a5a;
+  color: white;
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.sidebar ul li:hover {
+  opacity: 0.85;
+}
+
+/* ===============================
+   CONTENT AREA
+================================ */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* ===============================
+   TOP BAR
+================================ */
+.topbar {
+  background: white;
+  padding: 15px 20px;
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   CARDS
+================================ */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  font-weight: bold;
+  color: #1e2a5a;
+  text-align: center;
+}
+
+/* ===============================
+   TABLET VIEW
+================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 180px;
+  }
+
+  .topbar {
+    font-size: 16px;
+  }
+}
+
+/* ===============================
+   MOBILE VIEW
+================================ */
+@media (max-width: 600px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+  }
+
+  .sidebar h2 {
+    display: none;
+  }
+
+  .sidebar ul {
+    display: flex;
+    gap: 15px;
+  }
+
+  .sidebar ul li {
+    margin: 0;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .sidebar ul li:hover {
+    background: rgba(255, 255, 255, 0.15);
+    padding-left: 10px;
+    transition: 0.3s;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+}

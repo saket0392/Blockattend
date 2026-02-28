@@ -4,6 +4,6 @@ export function generateQRPayload({ courseId, facultyId }) {
     courseId,
     facultyId,
     timestamp: Date.now(),
-    expiresIn: 120000, // 2 minutes
+    expiresIn: 180000, // 3 minutes
   });
 }
