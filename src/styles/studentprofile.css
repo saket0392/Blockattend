@@ -1,0 +1,118 @@
+/* ===== BASE LAYOUT (same pattern as history) ===== */
+
+.profile-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6fb;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px;
+  background: #1e2a5a;
+  color: white;
+  padding: 20px;
+  flex-shrink: 0;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.sidebar ul li:hover {
+  text-decoration: underline;
+}
+
+/* ===== MAIN CONTENT (matches .content in history) ===== */
+.profile-container {
+  flex: 1;
+  padding: 30px;
+  overflow-x: auto;
+}
+
+.profile-container h2 {
+  margin-bottom: 20px;
+  color: #1e2a5a;
+}
+
+/* ===== PROFILE CARD (similar weight to history table) ===== */
+.profile-card {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* rows */
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.profile-row:last-child {
+  border-bottom: none;
+}
+
+.profile-row span {
+  font-weight: 600;
+  color: #555;
+}
+
+.profile-row p {
+  color: #1e2a5a;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* ===== MOBILE RESPONSIVENESS (same logic as history) ===== */
+
+@media (max-width: 768px) {
+  .profile-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .sidebar ul {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+
+  .sidebar ul li {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .profile-container {
+    padding: 20px;
+  }
+
+  .profile-card {
+    max-width: 100%;
+  }
+
+  .profile-row {
+    font-size: 14px;
+  }
+}

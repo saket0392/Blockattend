@@ -92,3 +92,9 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.verify = (req, res) => {
+  res.status(200).json({
+    message: "Token valid",
+    user: req.user,
+  });
+};
