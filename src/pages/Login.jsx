@@ -46,7 +46,7 @@ function Login() {
       }
     } catch (error) {
       console.error(error);
-      alert("Server error. Try again.");
+      alert(error.message || "Login failed");
     }
   };
 

@@ -47,3 +47,8 @@ npm run dev
 ```bash
 npm run build
 ```
+
+
+## Troubleshooting
+- If login shows "JWT_SECRET is not configured on the server", ensure `server/.env` exists and includes `JWT_SECRET`.
+- Restart the backend after updating `.env` values.
