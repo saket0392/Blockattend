@@ -4,9 +4,29 @@ const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 const { getAttendanceAnalytics } = require("../utils/attendanceAnalytics");
 
+async function getOrCreateStudentProfile(userId) {
+  let student = await Student.findOne({ user: userId });
+
+  if (!student) {
+    const user = await User.findById(userId);
+    if (!user) return null;
+
+    student = await Student.create({
+      user: user._id,
+      name: user.name,
+      rollNumber: `ROLL-${String(user._id).slice(-6)}`,
+      department: "General",
+      totalClasses: 0,
+      attendedClasses: 0,
+    });
+  }
+
+  return student;
+}
+
 exports.getStudentDashboard = async (req, res) => {
   try {
-    const student = await Student.findOne({ user: req.user.id });
+    const student = await getOrCreateStudentProfile(req.user.id);
 
     if (!student) {
       return res.status(404).json({ message: "Student profile not found" });
