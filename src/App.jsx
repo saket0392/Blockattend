@@ -8,9 +8,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 import GenerateQR from "./pages/attendance/GenerateQR";
 import ScanQR from "./pages/attendance/ScanQR";
 
-import AdminDashboard from "./pages/dashboards/AdminDashboard";
-import FacultyDashboard from "./pages/dashboards/FacultyDashboard";
-import StudentDashboard from "./pages/dashboards/StudentDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import FacultyDashboard from "./pages/faculty/FacultyDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import AttendanceHistory from "./pages/student/AttendanceHistory";
+import StudentProfile from "./pages/student/StudentProfile";
 
 import ProtectedRoute from "./components/ProtectedRoutes";
 
@@ -42,7 +44,6 @@ function App() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/faculty/mark-attendance"
         element={

@@ -2,10 +2,10 @@ const Session = require("../models/Sessions");
 const Student = require("../models/Student");
 const Attendance = require("../models/Attendance");
 
-// Haversine formula to compute distance between two lat/lng points in meters
+
 function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   const toRad = (v) => (v * Math.PI) / 180;
-  const R = 6371e3; // Earth radius in meters
+  const R = 6371e3; 
   const φ1 = toRad(lat1);
   const φ2 = toRad(lat2);
   const Δφ = toRad(lat2 - lat1);
@@ -27,10 +27,9 @@ exports.markAttendance = async (req, res) => {
       return res.status(400).json({ message: "studentId, sessionId and nonce are required" });
     }
 
+
     // If session enforces geolocation, latitude and longitude must be provided
     const providedGeo = typeof latitude === 'number' && typeof longitude === 'number';
-
-
     const session = await Session.findOne({ sessionId });
 
     if (!session) {
@@ -48,6 +47,7 @@ exports.markAttendance = async (req, res) => {
     if (session.nonce !== nonce) {
       return res.status(403).json({ message: "Invalid QR" });
     }
+
 
     // If session has location/radius set, validate the incoming coordinates
     if (session.location && session.location.lat != null && session.location.lng != null && session.radius) {
@@ -67,35 +67,54 @@ exports.markAttendance = async (req, res) => {
       }
     }
 
-    
     const student = await Student.findById(studentId);
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    
     const alreadyMarked = await Attendance.findOne({
       student: student._id,
-      session: session._id
+      session: session._id,
     });
 
     if (alreadyMarked) {
       return res.status(400).json({ message: "Attendance already marked" });
     }
 
-    
     await Attendance.create({
       student: student._id,
-      session: session._id
+      session: session._id,
     });
 
     student.attendedClasses += 1;
     await student.save();
 
     res.status(200).json({ message: "Attendance marked successfully" });
-
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+exports.getMyAttendanceHistory = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+
+    const attendance = await Attendance.find({ student: studentId })
+      .populate({
+        path: "session",
+        select: "subject",
+      })
+      .sort({ createdAt: -1 });
+
+    const formatted = attendance.map((a) => ({
+      _id: a._id,
+      date: a.createdAt.toISOString().split("T")[0],
+      courseName: a.session.subject,
+      status: a.status || "Present",
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load attendance history" });
   }
 };

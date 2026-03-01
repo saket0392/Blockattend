@@ -19,7 +19,7 @@ function Login() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/auth/login",
+        "http://localhost:8000/api/auth/login", // ✅ FIXED PORT
         {
           method: "POST",
           headers: {
@@ -27,10 +27,9 @@ function Login() {
           },
           body: JSON.stringify({
             email,
-            password,
-            role,
+            password, // ✅ role NOT sent
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -40,20 +39,19 @@ function Login() {
         return;
       }
 
-      
+      // ✅ SAVE AUTH DATA
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("userId", data.userId);
 
-      
+      // ✅ REDIRECT BASED ON ROLE (FROM BACKEND)
       if (data.role === "student") {
         navigate("/student");
       } else if (data.role === "faculty") {
-        navigate("/faculty/dashboard");
+        navigate("/faculty");
       } else if (data.role === "admin") {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }
-
     } catch (error) {
       console.error(error);
       alert("Server error. Try again.");
@@ -63,14 +61,12 @@ function Login() {
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Login
-        </h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Login</h2>
 
         <RoleSelector role={role} setRole={setRole} />
 
         <input
-          type="text"
+          type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
