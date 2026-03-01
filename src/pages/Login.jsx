@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import RoleSelector from "../components/RoleSelector";
 import "../styles/auth.css";
+import { apiFetch } from "../utils/api";
 
 function Login() {
   const [role, setRole] = useState("");
@@ -18,31 +19,22 @@ function Login() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/auth/login", // ✅ FIXED PORT
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password, // ✅ role NOT sent
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Login failed");
-        return;
-      }
+      const data = await apiFetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
       // ✅ SAVE AUTH DATA
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
       localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userName", data.name || "");
+      if (data.role === "faculty") {
+        localStorage.setItem("facultyName", data.name || "Faculty");
+      }
 
       // ✅ REDIRECT BASED ON ROLE (FROM BACKEND)
       if (data.role === "student") {

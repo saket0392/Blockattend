@@ -15,7 +15,7 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    await User.create({
       name,
       email,
       password: hashedPassword,
@@ -53,7 +53,8 @@ exports.login = async (req, res) => {
     res.json({
       token,
       role: user.role,
-      userId: user._id
+      userId: user._id,
+      name: user.name
     });
 
   } catch (error) {
@@ -88,7 +89,7 @@ exports.forgotPassword = async (req, res) => {
       message: "Reset token generated (check console)",
     });
 
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -97,4 +98,8 @@ exports.verify = (req, res) => {
     message: "Token valid",
     user: req.user,
   });
+};
+
+exports.logout = (_req, res) => {
+  res.status(200).json({ message: "Logged out successfully" });
 };

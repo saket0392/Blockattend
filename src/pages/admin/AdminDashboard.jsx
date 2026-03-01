@@ -1,213 +1,130 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../utils/api";
 
 const AdminDashboard = () => {
-  const [students, setStudents] = useState([]);
-  const [analyticsData, setAnalyticsData] = useState([]);
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/students")
-      .then(res => res.json())
-      .then(async (data) => {
-        setStudents(data);
+    let isMounted = true;
 
-        const analyticsPromises = data.map(student =>
-          fetch(`http://localhost:8000/api/students/${student._id}/analytics`)
-            .then(res => res.json())
-        );
+    const loadDashboard = async () => {
+      try {
+        const response = await apiFetch("/api/dashboard/admin");
+        if (isMounted) {
+          setData(response);
+          setError("");
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || "Failed to load admin dashboard");
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
 
-        const analyticsResults = await Promise.all(analyticsPromises);
-        setAnalyticsData(analyticsResults);
-      })
-      .catch(err => console.error(err));
+    loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const safeCount = analyticsData.filter(a => a.status === "SAFE").length;
-  const riskCount = analyticsData.filter(a => a.status === "RISK").length;
-  const dangerCount = analyticsData.filter(a => a.status === "DANGER").length;
-
-  const criticalStudents = analyticsData.filter(a => a.percentage < 60);
-  const warningStudents = analyticsData.filter(a => a.percentage >= 60 && a.percentage < 75);
-  const excellentStudents = analyticsData.filter(a => a.percentage >= 90);
-
-  const topRiskStudents = [...analyticsData]
-    .sort((a, b) => a.percentage - b.percentage)
-    .slice(0, 5);
-
-  const average =
-    analyticsData.length > 0
-      ? (
-          analyticsData.reduce((sum, a) => sum + a.percentage, 0) /
-          analyticsData.length
-        ).toFixed(2)
-      : 0;
-
-  const departmentStats = students.reduce((acc, student, index) => {
-    const dept = student.department;
-    const percentage = analyticsData[index]?.percentage || 0;
-
-    if (!acc[dept]) {
-      acc[dept] = { total: 0, sum: 0 };
+  const handleLogout = async () => {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore API failures.
+    } finally {
+      localStorage.clear();
+      navigate("/login", { replace: true });
     }
-
-    acc[dept].total += 1;
-    acc[dept].sum += percentage;
-
-    return acc;
-  }, {});
-
-  const departmentAverages = Object.keys(departmentStats).map(dept => ({
-    department: dept,
-    average: (
-      departmentStats[dept].sum / departmentStats[dept].total
-    ).toFixed(2)
-  }));
-
-  const adminInsight =
-    dangerCount > students.length * 0.4
-      ? "⚠ High academic risk detected. Immediate intervention required."
-      : "✅ Attendance levels are stable across departments.";
-
-  const getStatusColor = (status) => {
-    if (status === "SAFE") return "#16a34a";
-    if (status === "RISK") return "#f59e0b";
-    return "#dc2626";
   };
+
+  const topRiskStudents = useMemo(() => {
+    if (!data?.students) return [];
+    return [...data.students].sort((a, b) => a.percentage - b.percentage).slice(0, 5);
+  }, [data]);
+
+  const summary = data?.summary;
 
   return (
     <div style={{ padding: "40px", background: "#0f172a", minHeight: "100vh", color: "#fff" }}>
-      
-      <h1 style={{ fontSize: "34px", marginBottom: "30px" }}>
-        📊 Admin Intelligence Dashboard
-      </h1>
-
-      {/* Risk Cards */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
-        <div style={cardStyle("#16a34a")}>
-          <h3>SAFE</h3>
-          <h2>{safeCount}</h2>
-        </div>
-
-        <div style={cardStyle("#f59e0b")}>
-          <h3>RISK</h3>
-          <h2>{riskCount}</h2>
-        </div>
-
-        <div style={cardStyle("#dc2626")}>
-          <h3>DANGER</h3>
-          <h2>{dangerCount}</h2>
-        </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+        <h1 style={{ fontSize: "34px", marginBottom: "10px" }}>📊 Admin Intelligence Dashboard</h1>
+        <button onClick={handleLogout} style={{ height: "fit-content", padding: "10px 16px" }}>Logout</button>
       </div>
 
-      {/* Insight Box */}
-      <div style={{
-        background: "#1e293b",
-        padding: "20px",
-        borderRadius: "12px",
-        marginBottom: "30px"
-      }}>
-        <h3>AI Insight</h3>
-        <p>{adminInsight}</p>
-      </div>
+      {loading && <p>Loading admin dashboard...</p>}
+      {error && !loading && <p style={{ color: "#f87171" }}>{error}</p>}
 
-      {/* Critical Breakdown */}
-      <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
-        <div>🚨 Critical (&lt;60%): {criticalStudents.length}</div>
-        <div>⚠ Warning (60-75%): {warningStudents.length}</div>
-        <div>🔥 Excellent (90%+): {excellentStudents.length}</div>
-      </div>
+      {!loading && !error && summary && (
+        <>
+          <div style={{ display: "flex", gap: "20px", marginBottom: "30px" }}>
+            <div style={cardStyle("#16a34a")}><h3>SAFE</h3><h2>{summary.safeCount}</h2></div>
+            <div style={cardStyle("#f59e0b")}><h3>RISK</h3><h2>{summary.riskCount}</h2></div>
+            <div style={cardStyle("#dc2626")}><h3>DANGER</h3><h2>{summary.dangerCount}</h2></div>
+          </div>
 
-      {/* Progress Bar */}
-      <h2>Overall Attendance Health</h2>
-      <div style={{
-        background: "#1e293b",
-        borderRadius: "12px",
-        height: "25px",
-        overflow: "hidden",
-        marginBottom: "40px"
-      }}>
-        <div
-          style={{
-            width: `${average}%`,
-            background: "#3b82f6",
-            height: "100%",
-            textAlign: "center",
-            lineHeight: "25px",
-            fontWeight: "bold",
-            transition: "0.5s"
-          }}
-        >
-          {average}%
-        </div>
-      </div>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+            <div>Total Users: {summary.totalUsers}</div>
+            <div>Total Students: {summary.totalStudents}</div>
+            <div>Total Faculty: {summary.totalFaculty}</div>
+            <div>Total Admins: {summary.totalAdmins}</div>
+          </div>
 
-      {/* Top Risk Students */}
-      <h2>Top 5 At Risk Students</h2>
-      <ul style={{ marginBottom: "30px" }}>
-  {topRiskStudents.map((s, i) => {
-    const student = students.find(st => st._id === s.studentId);
+          <h2>Overall Attendance Health</h2>
+          <div style={{ background: "#1e293b", borderRadius: "12px", height: "25px", overflow: "hidden", marginBottom: "30px" }}>
+            <div style={{ width: `${summary.averageAttendance}%`, background: "#3b82f6", height: "100%", textAlign: "center", lineHeight: "25px", fontWeight: "bold" }}>
+              {summary.averageAttendance}%
+            </div>
+          </div>
 
-    return (
-      <li key={i}>
-        {student ? student.name : "Unknown"} — {s.percentage}%
-      </li>
-    );
-  })}
-</ul>
+          <h2>Top 5 At Risk Students</h2>
+          <ul style={{ marginBottom: "30px" }}>
+            {topRiskStudents.map((student) => (
+              <li key={student.studentId}>{student.name} — {student.percentage}%</li>
+            ))}
+          </ul>
 
-      {/* Department Performance */}
-      <h2>Department Performance</h2>
-      <ul style={{ marginBottom: "30px" }}>
-        {departmentAverages.map((d, i) => (
-          <li key={i}>
-            {d.department} — {d.average}%
-          </li>
-        ))}
-      </ul>
+          <h2>Department Performance</h2>
+          <ul style={{ marginBottom: "30px" }}>
+            {data.departmentAverages.map((dept) => (
+              <li key={dept.department}>{dept.department} — {dept.averageAttendance}% ({dept.studentCount} students)</li>
+            ))}
+          </ul>
 
-      {/* Student Table */}
-      <h2>Student Analytics</h2>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#1e293b",
-          borderRadius: "12px"
-        }}>
-          <thead style={{ background: "#334155" }}>
-            <tr>
-              <th style={thStyle}>Name</th>
-              <th style={thStyle}>Attendance %</th>
-              <th style={thStyle}>Status</th>
-              <th style={thStyle}>Required Classes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student, index) => {
-              const analytics = analyticsData[index];
-              if (!analytics) return null;
-
-              return (
-                <tr key={student._id} style={{ textAlign: "center" }}>
-                  <td style={tdStyle}>{student.name}</td>
-                  <td style={tdStyle}>{analytics.percentage}%</td>
-                  <td style={tdStyle}>
-                    <span style={{
-                      padding: "6px 14px",
-                      borderRadius: "20px",
-                      background: getStatusColor(analytics.status),
-                      fontWeight: "bold"
-                    }}>
-                      {analytics.status}
-                    </span>
-                  </td>
-                  <td style={tdStyle}>{analytics.requiredClasses}</td>
+          <h2>Student Analytics</h2>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", background: "#1e293b", borderRadius: "12px" }}>
+              <thead style={{ background: "#334155" }}>
+                <tr>
+                  <th style={thStyle}>Name</th>
+                  <th style={thStyle}>Department</th>
+                  <th style={thStyle}>Attendance %</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Required To Reach 75%</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
+              </thead>
+              <tbody>
+                {data.students.map((student) => (
+                  <tr key={student.studentId} style={{ textAlign: "center" }}>
+                    <td style={tdStyle}>{student.name}</td>
+                    <td style={tdStyle}>{student.department}</td>
+                    <td style={tdStyle}>{student.percentage}%</td>
+                    <td style={tdStyle}>{student.status}</td>
+                    <td style={tdStyle}>{student.requiredToReach75}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -219,17 +136,10 @@ const cardStyle = (color) => ({
   borderRadius: "16px",
   textAlign: "center",
   borderLeft: `6px solid ${color}`,
-  boxShadow: "0 4px 15px rgba(0,0,0,0.5)"
+  boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
 });
 
-const thStyle = {
-  padding: "14px",
-  fontWeight: "bold"
-};
-
-const tdStyle = {
-  padding: "14px",
-  borderBottom: "1px solid #334155"
-};
+const thStyle = { padding: "14px", fontWeight: "bold" };
+const tdStyle = { padding: "14px", borderBottom: "1px solid #334155" };
 
 export default AdminDashboard;

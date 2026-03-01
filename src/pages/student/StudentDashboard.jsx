@@ -1,41 +1,38 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/dashboard.css";
+import { apiFetch } from "../../utils/api";
 
 function StudentDashboard() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [dashboard, setDashboard] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    const verifyAuth = async () => {
-      const token = localStorage.getItem("token");
-      const role = localStorage.getItem("role");
-
-      if (!token || role !== "student") {
-        navigate("/login", { replace: true });
-        return;
-      }
-
+    const loadDashboard = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/auth/verify", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!res.ok) throw new Error("Invalid token");
+        const data = await apiFetch("/api/dashboard/student");
+        if (isMounted) {
+          setDashboard(data);
+          setError("");
+        }
       } catch (err) {
         if (isMounted) {
-          localStorage.clear();
-          navigate("/login", { replace: true });
+          setError(err.message || "Failed to load dashboard");
+          if ((err.message || "").toLowerCase().includes("not authorized")) {
+            localStorage.clear();
+            navigate("/login", { replace: true });
+          }
         }
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
 
-    verifyAuth();
+    loadDashboard();
 
     return () => {
       isMounted = false;
@@ -43,24 +40,17 @@ function StudentDashboard() {
   }, [navigate]);
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("token");
-
     try {
-      await fetch("http://localhost:8000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (err) {
-      // backend failure should NOT block logout
-      console.warn("Logout API failed, clearing session locally");
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore API failure; clear local session anyway.
     } finally {
       localStorage.clear();
       navigate("/login", { replace: true });
     }
   };
+
+  const metrics = dashboard?.metrics;
 
   return (
     <div className="dashboard">
@@ -69,9 +59,7 @@ function StudentDashboard() {
         <ul>
           <li onClick={() => navigate("/student")}>Dashboard</li>
           <li onClick={() => navigate("/student/scan")}>Scan Now</li>
-          <li onClick={() => navigate("/student/history")}>
-            Attendance History
-          </li>
+          <li onClick={() => navigate("/student/history")}>Attendance History</li>
           <li onClick={() => navigate("/student/profile")}>Profile</li>
           <li onClick={handleLogout}>Logout</li>
         </ul>
@@ -80,12 +68,24 @@ function StudentDashboard() {
       <main className="content">
         <header className="topbar">Student Attendance Dashboard</header>
 
-        <section className="cards">
-          <div className="card">Courses Enrolled: 5</div>
-          <div className="card">Attendance Percentage: 86%</div>
-          <div className="card">Classes Attended: 98</div>
-          <div className="card">Classes Missed: 16</div>
-        </section>
+        {loading && <p>Loading dashboard...</p>}
+        {error && !loading && <p style={{ color: "red" }}>{error}</p>}
+
+        {!loading && !error && metrics && (
+          <>
+            <section className="cards">
+              <div className="card">Total Classes: {metrics.totalClasses}</div>
+              <div className="card">Attendance: {metrics.attendancePercentage}%</div>
+              <div className="card">Classes Attended: {metrics.attendedClasses}</div>
+              <div className="card">Classes Missed: {metrics.missedClasses}</div>
+            </section>
+
+            <section style={{ marginTop: "20px" }}>
+              <h3>Attendance Status: {metrics.status}</h3>
+              <p>Classes needed to reach 75%: {metrics.requiredToReach75}</p>
+            </section>
+          </>
+        )}
       </main>
     </div>
   );
