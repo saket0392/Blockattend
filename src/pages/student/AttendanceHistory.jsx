@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/attendancehistory.css";
+import { apiFetch } from "../../utils/api";
 
 function AttendanceHistory() {
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    const token = localStorage.getItem("token");
-
     try {
-      await fetch("http://localhost:8000/api/auth/logout", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (err) {
-      console.warn("Logout API failed, clearing session locally");
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore API errors.
     } finally {
       localStorage.clear();
       navigate("/login", { replace: true });
@@ -26,24 +21,31 @@ function AttendanceHistory() {
   };
 
   useEffect(() => {
-    // TEMP: simulate backend data
-    setHistory([
-      {
-        date: "2026-02-25",
-        course: "DBMS",
-        status: "Present",
-      },
-      {
-        date: "2026-02-26",
-        course: "Operating Systems",
-        status: "Absent",
-      },
-      {
-        date: "2026-02-27",
-        course: "Computer Networks",
-        status: "Present",
-      },
-    ]);
+    let isMounted = true;
+
+    const fetchHistory = async () => {
+      try {
+        const data = await apiFetch("/api/attendance/me");
+        if (isMounted) {
+          setHistory(data);
+          setError("");
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || "Failed to load attendance history");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchHistory();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -53,9 +55,7 @@ function AttendanceHistory() {
         <ul>
           <li onClick={() => navigate("/student")}>Dashboard</li>
           <li onClick={() => navigate("/student/scan")}>Scan Now</li>
-          <li onClick={() => navigate("/student/history")}>
-            Attendance History
-          </li>
+          <li onClick={() => navigate("/student/history")}>Attendance History</li>
           <li onClick={() => navigate("/student/profile")}>Profile</li>
           <li onClick={handleLogout}>Logout</li>
         </ul>
@@ -64,29 +64,30 @@ function AttendanceHistory() {
       <main className="content">
         <h2>Attendance History</h2>
 
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Course</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+        {loading && <p>Loading attendance history...</p>}
+        {error && !loading && <p style={{ color: "red" }}>{error}</p>}
 
-          <tbody>
-            {history.map((item, index) => (
-              <tr key={index}>
-                <td>{item.date}</td>
-                <td>{item.course}</td>
-                <td
-                  className={item.status === "Present" ? "present" : "absent"}
-                >
-                  {item.status}
-                </td>
+        {!loading && !error && (
+          <table className="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Course</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {history.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.date}</td>
+                  <td>{item.courseName}</td>
+                  <td className={item.status === "Present" ? "present" : "absent"}>{item.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </main>
     </div>
   );

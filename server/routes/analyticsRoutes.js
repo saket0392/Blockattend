@@ -17,7 +17,7 @@ router.get("/:id/analytics", async (req, res) => {
     const analytics = getAttendanceAnalytics(
       totalClasses,
       attendedClasses,
-      remainingClasses = 100 - totalClasses,
+      100 - totalClasses,
     );
 
     res.json({

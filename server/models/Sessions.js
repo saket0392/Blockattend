@@ -14,6 +14,10 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  facultyId: {
+    type: String,
+    required: true
+  },
   startTime: {
     type: Date,
     default: Date.now
