@@ -2,13 +2,33 @@ const Session = require("../models/Sessions");
 const Student = require("../models/Student");
 const Attendance = require("../models/Attendance");
 
+// Haversine formula to compute distance between two lat/lng points in meters
+function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371e3; // Earth radius in meters
+  const φ1 = toRad(lat1);
+  const φ2 = toRad(lat2);
+  const Δφ = toRad(lat2 - lat1);
+  const Δλ = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c;
+  return d;
+}
+
 exports.markAttendance = async (req, res) => {
   try {
-    const { studentId, sessionId, nonce } = req.body;
+    const { studentId, sessionId, nonce, latitude, longitude } = req.body;
 
     if (!studentId || !sessionId || !nonce) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "studentId, sessionId and nonce are required" });
     }
+
+    // If session enforces geolocation, latitude and longitude must be provided
+    const providedGeo = typeof latitude === 'number' && typeof longitude === 'number';
 
 
     const session = await Session.findOne({ sessionId });
@@ -27,6 +47,24 @@ exports.markAttendance = async (req, res) => {
 
     if (session.nonce !== nonce) {
       return res.status(403).json({ message: "Invalid QR" });
+    }
+
+    // If session has location/radius set, validate the incoming coordinates
+    if (session.location && session.location.lat != null && session.location.lng != null && session.radius) {
+      if (!providedGeo) {
+        return res.status(400).json({ message: "Location required for this session" });
+      }
+
+      const distance = getDistanceInMeters(
+        session.location.lat,
+        session.location.lng,
+        latitude,
+        longitude
+      );
+
+      if (distance > session.radius) {
+        return res.status(403).json({ message: "Outside allowed area for attendance" });
+      }
     }
 
     

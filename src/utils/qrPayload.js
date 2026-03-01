@@ -1,10 +1,11 @@
-export function generateQRPayload({ courseId, facultyId }) {
+export const generateQRPayload = ({ courseId, facultyId }) => {
+  const sessionId = `${courseId}-${Date.now()}`;
+
   return JSON.stringify({
-    sessionId: crypto.randomUUID(),
+    sessionId,            
     courseId,
     facultyId,
     timestamp: Date.now(),
-    expiresIn: 180000, // 3 minutes
-    nonce: Math.random().toString(36).substring(2),
+    expiresIn: 3 * 60 * 1000 
   });
-}
+};

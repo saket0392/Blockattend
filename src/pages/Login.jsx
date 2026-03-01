@@ -47,7 +47,7 @@ function Login() {
 
       
       if (data.role === "student") {
-        navigate("/student/dashboard");
+        navigate("/student");
       } else if (data.role === "faculty") {
         navigate("/faculty/dashboard");
       } else if (data.role === "admin") {

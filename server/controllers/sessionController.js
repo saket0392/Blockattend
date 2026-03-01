@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 
 exports.createSession = async (req, res) => {
   try {
-    const { subject, facultyName } = req.body;
+    const { subject, facultyName, latitude, longitude, radius } = req.body;
 
     if (!subject || !facultyName) {
       return res.status(400).json({ message: "All fields are required" });
@@ -15,14 +15,22 @@ exports.createSession = async (req, res) => {
 
     const expiryTime = new Date(Date.now() + 5 * 60 * 1000); 
 
-    const session = await Session.create({
+    const sessionObj = {
       sessionId,
       subject,
       facultyName,
       expiryTime,
       nonce,
       isActive: true
-    });
+    };
+
+    // If location info provided, attach to session (latitude/longitude expected as numbers)
+    if (typeof latitude === "number" && typeof longitude === "number") {
+      sessionObj.location = { lat: latitude, lng: longitude };
+      if (typeof radius === "number") sessionObj.radius = radius;
+    }
+
+    const session = await Session.create(sessionObj);
 
     res.status(201).json({
       sessionId: session.sessionId,

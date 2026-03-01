@@ -30,6 +30,16 @@ const sessionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
+  ,
+
+  location: {
+    lat: { type: Number },
+    lng: { type: Number }
+  },
+  radius: {
+    type: Number, // meters
+    default: null
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Session", sessionSchema);

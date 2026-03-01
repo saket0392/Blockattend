@@ -38,7 +38,7 @@ function ForgotPassword() {
       console.error(error);
       alert("Server error");
     }
-  };
+};
 
   return (
     <div className="auth-container">

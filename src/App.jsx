@@ -12,7 +12,7 @@ import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import FacultyDashboard from "./pages/dashboards/FacultyDashboard";
 import StudentDashboard from "./pages/dashboards/StudentDashboard";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoutes";
 
 function App() {
   return (
@@ -52,24 +52,16 @@ function App() {
         }
       />
 
-      {/* Student Routes */}
       <Route
-        path="/student/*"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/student/attendance"
-        element={
-          <ProtectedRoute allowedRole="student">
-            <ScanQR />
-          </ProtectedRoute>
-        }
-      />
+  path="/student"
+  element={
+    <ProtectedRoute allowedRole="student">
+      <StudentDashboard />
+    </ProtectedRoute>
+  }
+>
+  <Route path="attendance" element={<ScanQR />} />
+</Route>
     </Routes>
   );
 }

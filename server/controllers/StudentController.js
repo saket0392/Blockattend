@@ -1,7 +1,6 @@
 const Student = require("../models/Student");
 const { getAttendanceAnalytics } = require("../utils/attendanceAnalytics");
 
-// CREATE STUDENT
 exports.createStudent = async (req, res) => {
   try {
     const { name, rollNumber, department } = req.body;
@@ -35,7 +34,7 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
-// GET ANALYTICS
+
 exports.getStudentAnalytics = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/dashboard.css";
+import { Outlet } from "react-router-dom";
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ function StudentDashboard() {
           <div className="card">Classes Attended: 98</div>
           <div className="card">Classes Missed: 16</div>
         </section>
+        <Outlet />
       </main>
     </div>
   );

@@ -10,7 +10,7 @@ function Landing() {
       <header className="hero">
         <h1>BlockAttend</h1>
         <p>
-          AI-Powered Smart Attendance Management System
+          Next-Gen Attendance Management.
           <br />
           Secure • Predictive • Real-Time
         </p>
@@ -123,7 +123,7 @@ function Landing() {
 
           <div className="card">
             <h3>📊 Attendance Prediction</h3>
-            <p>AI predicts attendance recovery paths before shortages occur.</p>
+            <p>predicts attendance recovery paths before shortages occur.</p>
           </div>
 
           <div className="card">
