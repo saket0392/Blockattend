@@ -5,7 +5,7 @@ const {
   getAllStudents,
   getStudentAnalytics,
 } = require("../controllers/StudentController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const {
   getMyProfile,
   getMyAnalytics,
@@ -13,7 +13,7 @@ const {
 
 router.get("/me", protect, getMyProfile);
 router.get("/me/analytics", protect, getMyAnalytics);
-router.post("/", createStudent);
-router.get("/", getAllStudents);
-router.get("/:id/analytics", getStudentAnalytics);
+router.post("/", protect, authorize("student"), createStudent);
+router.get("/", protect, authorize("admin"), getAllStudents);
+router.get("/:id/analytics", protect, authorize("admin"), getStudentAnalytics);
 module.exports = router;

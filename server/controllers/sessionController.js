@@ -6,8 +6,8 @@ exports.createSession = async (req, res) => {
   try {
     const { subject, facultyName, latitude, longitude, radius } = req.body;
 
-    if (!subject || !facultyName) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!subject) {
+      return res.status(400).json({ message: "Subject is required" });
     }
 
     const sessionId = uuidv4();
@@ -18,7 +18,8 @@ exports.createSession = async (req, res) => {
     const sessionObj = {
       sessionId,
       subject,
-      facultyName,
+      facultyName: facultyName || req.user.name || "Faculty",
+      facultyId: req.user.id,
       expiryTime,
       nonce,
       isActive: true

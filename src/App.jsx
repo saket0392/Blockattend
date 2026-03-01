@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -6,7 +6,7 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 
 import GenerateQR from "./pages/attendance/GenerateQR";
-import ScanQR from "./pages/attendance/ScanQR";
+import ScanQR from "./pages/student/ScanQR";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
@@ -19,15 +19,13 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* Admin Routes */}
       <Route
-        path="/admin/*"
+        path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
             <AdminDashboard />
@@ -35,9 +33,8 @@ function App() {
         }
       />
 
-      {/* Faculty Routes */}
       <Route
-        path="/faculty/*"
+        path="/faculty"
         element={
           <ProtectedRoute allowedRole="faculty">
             <FacultyDashboard />
@@ -54,15 +51,39 @@ function App() {
       />
 
       <Route
-  path="/student"
-  element={
-    <ProtectedRoute allowedRole="student">
-      <StudentDashboard />
-    </ProtectedRoute>
-  }
->
-  <Route path="attendance" element={<ScanQR />} />
-</Route>
+        path="/student"
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/scan"
+        element={
+          <ProtectedRoute allowedRole="student">
+            <ScanQR />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/history"
+        element={
+          <ProtectedRoute allowedRole="student">
+            <AttendanceHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student/profile"
+        element={
+          <ProtectedRoute allowedRole="student">
+            <StudentProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

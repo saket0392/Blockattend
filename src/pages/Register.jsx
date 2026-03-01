@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import RoleSelector from "../components/RoleSelector";
 import "../styles/auth.css";
+import { apiFetch } from "../utils/api";
 
 function Register() {
   const [role, setRole] = useState("");
@@ -28,30 +29,17 @@ function Register() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/auth/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-            role,
-            crn,          // backend will ignore if not used
-            adminCode,    // backend can validate if needed
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Registration failed");
-        return;
-      }
+      await apiFetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+          crn,
+          adminCode,
+        }),
+      });
 
       alert("Registration successful! Please login.");
       navigate("/login");

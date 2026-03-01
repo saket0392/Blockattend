@@ -1,16 +1,54 @@
-# React + Vite
+# BlockAttend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Role-based attendance system with:
+- Student dashboard
+- Faculty dashboard + QR session creation
+- Admin analytics dashboard
 
-Currently, two official plugins are available:
+All dashboard data is served from backend APIs (no hardcoded/static cards).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tech
+- Frontend: React + Vite
+- Backend: Express + MongoDB (Mongoose)
 
-## React Compiler
+## Environment
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Backend (`server/.env`)
+```env
+PORT=8000
+MONGO_URI=mongodb://127.0.0.1:27017/blockattend
+JWT_SECRET=your_jwt_secret
+```
 
-## Expanding the ESLint configuration
+### Frontend (`.env`)
+```env
+VITE_API_BASE_URL=http://localhost:8000
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Run locally
+
+```bash
+# terminal 1 (backend)
+cd server
+npm install
+node Server.js
+
+# terminal 2 (frontend)
+cd ..
+npm install
+npm run dev
+```
+
+## Production / Deploy notes
+- Set `VITE_API_BASE_URL` to your deployed backend URL.
+- Set `PORT`, `MONGO_URI`, and `JWT_SECRET` in backend environment.
+- CORS is enabled in backend; tighten origin allowlist for production.
+- Build frontend with:
+```bash
+npm run build
+```
+
+
+## Troubleshooting
+- If login shows "JWT_SECRET is not configured on the server", ensure `server/.env` exists and includes `JWT_SECRET`.
+- Restart the backend after updating `.env` values.
