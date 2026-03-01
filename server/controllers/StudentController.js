@@ -86,7 +86,7 @@ exports.getMyProfile = async (req, res) => {
     }
 
     res.json(student);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -109,7 +109,7 @@ exports.getMyAnalytics = async (req, res) => {
     );
 
     res.json(analytics);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 };

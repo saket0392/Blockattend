@@ -1,12 +1,28 @@
 const User = require("../models/User");
+const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
+async function ensureStudentProfile(user, payload = {}) {
+  if (user.role !== "student") return;
+
+  const existing = await Student.findOne({ user: user._id });
+  if (existing) return;
+
+  await Student.create({
+    user: user._id,
+    name: user.name,
+    rollNumber: payload.rollNumber || payload.crn || `ROLL-${String(user._id).slice(-6)}`,
+    department: payload.department || "General",
+    totalClasses: 0,
+    attendedClasses: 0,
+  });
+}
 
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, rollNumber, department, crn } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -19,20 +35,26 @@ exports.signup = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role
+      role,
     });
 
-    res.status(201).json({ message: "User created successfully" });
+    await ensureStudentProfile(user, { rollNumber, department, crn });
 
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        message: "JWT_SECRET is not configured on the server",
+      });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -44,18 +66,18 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
+    await ensureStudentProfile(user);
+
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "2h",
+    });
 
     res.json({
       token,
       role: user.role,
-      userId: user._id
+      userId: user._id,
+      name: user.name,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -73,10 +95,8 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // Save token + expiry (10 mins)
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
@@ -87,14 +107,18 @@ exports.forgotPassword = async (req, res) => {
     res.json({
       message: "Reset token generated (check console)",
     });
-
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 exports.verify = (req, res) => {
   res.status(200).json({
     message: "Token valid",
     user: req.user,
   });
+};
+
+exports.logout = (_req, res) => {
+  res.status(200).json({ message: "Logged out successfully" });
 };

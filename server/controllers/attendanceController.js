@@ -21,10 +21,10 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
 
 exports.markAttendance = async (req, res) => {
   try {
-    const { studentId, sessionId, nonce, latitude, longitude } = req.body;
+    const { sessionId, nonce, latitude, longitude } = req.body;
 
-    if (!studentId || !sessionId || !nonce) {
-      return res.status(400).json({ message: "studentId, sessionId and nonce are required" });
+    if (!sessionId || !nonce) {
+      return res.status(400).json({ message: "sessionId and nonce are required" });
     }
 
 
@@ -67,7 +67,7 @@ exports.markAttendance = async (req, res) => {
       }
     }
 
-    const student = await Student.findById(studentId);
+    const student = await Student.findOne({ user: req.user.id });
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
@@ -97,9 +97,13 @@ exports.markAttendance = async (req, res) => {
 };
 exports.getMyAttendanceHistory = async (req, res) => {
   try {
-    const studentId = req.user.id;
+    const student = await Student.findOne({ user: req.user.id });
 
-    const attendance = await Attendance.find({ student: studentId })
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const attendance = await Attendance.find({ student: student._id })
       .populate({
         path: "session",
         select: "subject",
@@ -114,7 +118,7 @@ exports.getMyAttendanceHistory = async (req, res) => {
     }));
 
     res.json(formatted);
-  } catch (error) {
+  } catch {
     res.status(500).json({ message: "Failed to load attendance history" });
   }
 };

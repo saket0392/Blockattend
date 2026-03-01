@@ -1,39 +1,31 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/studentprofile.css";
+import { apiFetch } from "../../utils/api";
 
 function StudentProfile() {
   const [student, setStudent] = useState(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore API errors.
+    } finally {
+      localStorage.clear();
+      navigate("/login");
+    }
   };
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-          throw new Error("User not logged in");
-        }
-
-        const res = await fetch("http://localhost:8000/api/students", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch profile");
-        }
-
-        const data = await res.json();
+        const data = await apiFetch("/api/students/me");
         setStudent(data);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "Failed to load profile");
       }
     };
 
@@ -45,21 +37,17 @@ function StudentProfile() {
 
   return (
     <div className="profile-layout">
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <h2>Student Panel</h2>
         <ul>
           <li onClick={() => navigate("/student")}>Dashboard</li>
           <li onClick={() => navigate("/student/scan")}>Scan Now</li>
-          <li onClick={() => navigate("/student/history")}>
-            Attendance History
-          </li>
+          <li onClick={() => navigate("/student/history")}>Attendance History</li>
           <li onClick={() => navigate("/student/profile")}>Profile</li>
           <li onClick={handleLogout}>Logout</li>
         </ul>
       </aside>
 
-      {/* CONTENT */}
       <main className="profile-container">
         <h2>My Profile</h2>
 
@@ -93,4 +81,5 @@ function StudentProfile() {
     </div>
   );
 }
+
 export default StudentProfile;

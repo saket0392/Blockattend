@@ -2,12 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import RoleSelector from "../components/RoleSelector";
 import "../styles/auth.css";
+import { apiFetch } from "../utils/api";
 
 function Register() {
   const [role, setRole] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [crn, setCrn] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
+  const [department, setDepartment] = useState("");
   const [adminCode, setAdminCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,46 +31,32 @@ function Register() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/auth/signup",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            email,
-            password,
-            role,
-            crn,          // backend will ignore if not used
-            adminCode,    // backend can validate if needed
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Registration failed");
-        return;
-      }
+      await apiFetch("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+          crn,
+          rollNumber,
+          department,
+          adminCode,
+        }),
+      });
 
       alert("Registration successful! Please login.");
       navigate("/login");
-
     } catch (error) {
       console.error(error);
-      alert("Server error. Try again.");
+      alert(error.message || "Registration failed");
     }
   };
 
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          Register
-        </h2>
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Register</h2>
 
         <RoleSelector role={role} setRole={setRole} />
 
@@ -88,6 +77,24 @@ function Register() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+
+            {role === "student" && (
+              <>
+                <input
+                  type="text"
+                  placeholder="Roll Number"
+                  value={rollNumber}
+                  onChange={(e) => setRollNumber(e.target.value)}
+                />
+
+                <input
+                  type="text"
+                  placeholder="Department"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                />
+              </>
+            )}
 
             <input
               type="text"
